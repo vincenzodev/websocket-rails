@@ -70,7 +70,7 @@ describe 'WebSocketRails:', ->
       @dispatcher.reconnect()
       helpers.startConnection(@dispatcher, NEW_CONNECTION_ID)
 
-      expect(@dispatcher.queue[event.id].connection_id).toEqual NEW_CONNECTION_ID
+      expect(@dispatcher.queue[event.name][event.id].connection_id).toEqual NEW_CONNECTION_ID
 
     it 'should not resend completed events', ->
       event = @dispatcher.trigger('create_post')
@@ -80,7 +80,7 @@ describe 'WebSocketRails:', ->
       @dispatcher.reconnect()
       helpers.startConnection(@dispatcher, NEW_CONNECTION_ID)
 
-      expect(@dispatcher.queue[event.id].connection_id).toEqual OLD_CONNECTION_ID
+      expect(@dispatcher.queue[event.name][event.id].connection_id).toEqual OLD_CONNECTION_ID
 
     it 'should reconnect to all channels', ->
       mock_dispatcher = sinon.mock @dispatcher
@@ -214,7 +214,7 @@ describe 'WebSocketRails:', ->
     describe '.trigger', ->
       it 'should add the event to the queue', ->
         event = @dispatcher.trigger 'event', 'message'
-        expect(@dispatcher.queue[event.id]).toEqual event
+        expect(@dispatcher.queue[event.name][event.id]).toEqual event
 
       it 'should delegate to the connection object', ->
         conn_trigger = sinon.spy @dispatcher._conn, 'trigger'

@@ -58,9 +58,11 @@ class @WebSocketRails
     @connect()
 
     # Resend all unfinished events from the previous connection.
-    for id, event of @queue
-      if event.connection_id == old_connection_id && !event.is_result()
-        @trigger_event event
+    for event_name, event_ids of @queue
+      for id, event of event_ids
+        e = if id?.connection_id? then id else event
+        if e.connection_id == old_connection_id && !e.is_result()
+          @trigger_event event
 
     @reconnect_channels()
 
@@ -68,8 +70,12 @@ class @WebSocketRails
     for socket_message in data
       event = new WebSocketRails.Event( socket_message )
       if event.is_result()
-        @queue[event.id]?.run_callbacks(event.success, event.data)
-        delete @queue[event.id]
+        q = if @queue[event.name]?[event.id]? then @queue[event.name][event.id] else @queue[event.id]
+        q?.run_callbacks(event.success, event.data)
+        console.log q
+        delete @queue[event.name][event.id] if @queue[event.name]?[event.id]?
+        delete @queue[event.name] if @queue[event.name]? and Object.keys(@queue[event.name]).length == 0
+        delete @queue[event.id] if @queue[event.id]?
       else if event.is_channel()
         @dispatch_channel event
       else if event.is_ping()
@@ -99,7 +105,8 @@ class @WebSocketRails
     @trigger_event event
 
   trigger_event: (event) =>
-    @queue[event.id] ?= event # Prevent replacing an event that has callbacks stored
+    @queue[event.name] ?= {}
+    @queue[event.name][event.id] ?= event # Prevent replacing an event that has callbacks stored
     @_conn.trigger event if @_conn
     event
 
