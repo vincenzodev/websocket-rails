@@ -70,8 +70,13 @@ class @WebSocketRails
     for socket_message in data
       event = new WebSocketRails.Event( socket_message )
       if event.is_result()
-        q = if @queue[event.name]?[event.id]? then @queue[event.name][event.id] else @queue[event.id]
-        q?.run_callbacks(event.success, event.data)
+        qu = if @queue[event.name]?[event.id]? then @queue[event.name][event.id] else @queue[event.id]
+        if qu?
+          if qu.length?
+            for q in qu
+              q?.run_callbacks(event.success, event.data)
+          else
+            qu?.run_callbacks(event.success, event.data)
         delete @queue[event.name][event.id] if @queue[event.name]?[event.id]?
         delete @queue[event.name] if @queue[event.name]? and Object.keys(@queue[event.name]).length == 0
         delete @queue[event.id] if @queue[event.id]?
