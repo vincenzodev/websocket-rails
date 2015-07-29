@@ -16,22 +16,32 @@ module WebsocketRails
       channel_manager.channel_tokens
     end
 
+    def filtered_channels
+      channel_manager.filtered_channels
+    end
+
   end
 
   class ChannelManager
 
-    attr_reader :channels
+    attr_reader :channels, :filtered_channels
+    delegate :sync, to: Synchronization
 
     def initialize
       @channels = {}.with_indifferent_access
+      @filtered_channels = {}.with_indifferent_access
+    end
+
+    def register_channel(name, token)
+      channel_tokens[name] = token
     end
 
     def channel_tokens
       @channel_tokens ||= begin
         if WebsocketRails.synchronize?
-          ::Redis::HashKey.new('websocket_rails.channel_tokens', Synchronization.redis)
+          sync.channel_tokens
         else
-          {}
+          @channel_tokens ||= {}
         end
       end
     end
