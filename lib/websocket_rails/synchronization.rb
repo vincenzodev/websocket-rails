@@ -132,7 +132,7 @@ module WebsocketRails
       def register_remote_user(connection)
         id = connection.user_identifier
         user = connection.user
-        @active_users[id] = user
+        @active_users[id] = user.is_a?(String) ? user : user.to_json
       end
 
       def destroy_remote_user(identifier)
