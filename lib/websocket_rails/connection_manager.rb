@@ -103,11 +103,13 @@ module WebsocketRails
       return unless connection.user_connection?
       WebsocketRails.users[connection.user_identifier] = connection
     end
+    public :register_user_connection
 
     def destroy_user_connection(connection)
       return unless connection.user_connection?
       WebsocketRails.users.delete(connection)
     end
+    public :destroy_user_connection
 
   end
 end

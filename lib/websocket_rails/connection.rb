@@ -108,6 +108,14 @@ module WebsocketRails
        end
     end
 
+    def register_user
+      dispatcher.connection_manager.register_user_connection self
+    end
+
+    def destroy_user
+      dispatcher.connection_manager.destroy_user_connection self
+    end
+
     private
 
     def dispatch(event)
