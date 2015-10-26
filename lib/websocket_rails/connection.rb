@@ -10,7 +10,7 @@ module WebsocketRails
     end
 
     attr_reader :id, :dispatcher, :queue, :env, :request, :data_store,
-                :websocket, :message_handler
+                :websocket, :message_handler, :current_device
 
     delegate :supported_protocols, to: WebsocketRails
     delegate :on_open, :on_message, :on_close, :on_error, to: :message_handler
@@ -26,6 +26,7 @@ module WebsocketRails
       @delegate   = WebsocketRails::DelegationController.new
       @delegate.instance_variable_set(:@_env, request.env)
       @delegate.instance_variable_set(:@_request, request)
+      @current_device = nil
 
       bind_message_handler
     rescue => ex
@@ -108,7 +109,8 @@ module WebsocketRails
        end
     end
 
-    def register_user
+    def register_user(device = nil)
+      @current_device = device
       dispatcher.connection_manager.register_user_connection self
     end
 
